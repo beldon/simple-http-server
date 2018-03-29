@@ -26,19 +26,19 @@ public class HttpHandler implements Runnable {
 
     @Override
     public void run() {
-        //初始化上下文
-        context.setContext(requestHeader, key);
-        //得到uri
-        String uri = context.getRequest().getUri();
-        logger.info("得到了uri " + uri);
-        //得到MapHandler集合(uri-->handler)
-        handler = MapHandler.getContextMapInstance().getHandlerMap().get(uri);
-        //找不到对应的handler
-        if(handler == null) {
-            //404Handler进行处理
-            handler = new NotFoundHandler();
-        }
-        //初始化handler并执行
-        handler.init(context);
+//        //初始化上下文
+//        context.setContext(requestHeader, key);
+//        //得到uri
+//        String uri = context.getRequest().getUri();
+//        logger.info("得到了uri " + uri);
+//        //得到MapHandler集合(uri-->handler)
+//        handler = MapHandler.getContextMapInstance().getHandlerMap().get(uri);
+//        //找不到对应的handler
+//        if(handler == null) {
+//            //404Handler进行处理
+//            handler = new NotFoundHandler();
+//        }
+//        //初始化handler并执行
+//        handler.init(context);
     }
 }

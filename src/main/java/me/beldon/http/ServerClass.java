@@ -9,10 +9,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,7 +22,7 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class ServerClass implements ApplicationListener<ContextRefreshedEvent> {
 
-    private int port = 81;
+    private int port = 8282;
     private Selector selector;
 
     private volatile boolean running = true;
@@ -80,7 +78,8 @@ public class ServerClass implements ApplicationListener<ContextRefreshedEvent> {
                             if(requestHeader.length() > 0) {
                                 log.info("该请求的头格式为\r\n" + requestHeader);
                                 log.info("启动了子线程..");
-                                new Thread(new HttpHandler(requestHeader, key)).start();
+//                                new Thread(new HttpHandler(requestHeader, key)).start();
+                                doAccept(key);
                             }
                         } else if (key.isWritable()) {
                             //该key有Write事件
@@ -125,23 +124,32 @@ public class ServerClass implements ApplicationListener<ContextRefreshedEvent> {
     }
 
     private void doAccept(SelectionKey selectionKey) throws IOException {
-        ServerSocketChannel serverSocketChannel = (ServerSocketChannel) selectionKey.channel();
-        SocketChannel socketChannel;
-        while ((socketChannel = serverSocketChannel.accept()) != null) {
-            log.info("doAccept accept");
-            try {
-                socketChannel.configureBlocking(false);
-                socketChannel.socket().setTcpNoDelay(true);
-                socketChannel.socket().setKeepAlive(true);
-            } catch (IOException e) {
-                socketChannel.close();
-                throw e;
-            }
-            ByteBuffer buffer = ByteBuffer.allocate(10);
-            buffer.put("hello".getBytes());
-            buffer.flip();
-//            buffer.rewind();
-            socketChannel.write(buffer);
+        SocketChannel channel = (SocketChannel) selectionKey.channel();
+        //得到响应正文内容
+        String html = "hello world";
+
+        StringBuilder sb = new StringBuilder();
+        //状态行
+        sb.append("HTTP/1.1 200 OK\r\n");
+        //响应头
+        sb.append("Server: bel\r\n");
+        sb.append("Content-Type: text/html; charset=UTF-8\r\n");
+        sb.append("Date: " + new Date() + "\r\n");
+        sb.append("Content-Length: " + html.getBytes().length + "\r\n");
+
+        //响应内容
+        sb.append("\r\n");
+        sb.append(html);
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        buffer.put(sb.toString().getBytes());
+        //从写模式，切换到读模式
+        buffer.flip();
+        try {
+            log.info("生成相应\r\n" + sb.toString());
+            channel.register(selector, SelectionKey.OP_WRITE);
+            channel.write(buffer);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
