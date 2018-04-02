@@ -1,9 +1,6 @@
 package me.beldon.http.server;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StreamUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,15 +12,12 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
  * @author Beldon
  * @create 2018-03-30 下午4:18
  */
-@Component
-@Scope("prototype")
 @Slf4j
 public class ClientContext implements Runnable {
 
@@ -156,7 +150,6 @@ public class ClientContext implements Runnable {
             buffer.flip();
             socketChannel.write(buffer);
             buffer.clear();
-
         }
     }
 }
