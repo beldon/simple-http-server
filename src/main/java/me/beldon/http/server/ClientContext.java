@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -59,10 +60,12 @@ public class ClientContext implements Runnable {
     private void handle() throws IOException {
         String header = getHeader(socketChannel);
         log.info("header:{}", header);
-        File file = new File("html/temp.html");
-        FileInputStream fileInputStream = new FileInputStream(file);
-        String html = StreamUtils.copyToString(fileInputStream,StandardCharsets.UTF_8);
-        write(socketChannel, html);
+        writeImg();
+
+//        File file = new File("html/temp.html");
+//        FileInputStream fileInputStream = new FileInputStream(file);
+//        String html = StreamUtils.copyToString(fileInputStream, StandardCharsets.UTF_8);
+//        write(socketChannel, html);
         socketChannel.shutdownInput();
         socketChannel.close();
     }
@@ -123,6 +126,37 @@ public class ClientContext implements Runnable {
 
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+
+    private void writeImg() throws IOException {
+        File img = new File("html/temp.png");
+        long length = img.length();
+
+        StringBuilder sb = new StringBuilder();
+        //状态行
+        sb.append("HTTP/1.1 200 OK\r\n");
+        //响应头
+        sb.append("Server: bel\r\n");
+        sb.append("Content-Type: image/jpeg\r\n");
+        sb.append("Date: " + new Date() + "\r\n");
+        sb.append("Content-Length: " + length + "\r\n");
+
+        //响应内容
+        sb.append("\r\n");
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        buffer.put(sb.toString().getBytes());
+        buffer.flip();
+        socketChannel.write(buffer);
+        buffer.clear();
+        FileChannel fileChannel = new FileInputStream(img).getChannel();
+        while (fileChannel.read(buffer) != -1) {
+            fileChannel.read(buffer);
+            buffer.flip();
+            socketChannel.write(buffer);
+            buffer.clear();
+
         }
     }
 }
