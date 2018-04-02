@@ -5,5 +5,5 @@ package me.beldon.http.handler;
  * @create 2018-04-02 下午6:33
  */
 public interface Handler<T, V> {
-    V handler(T t);
+    V handle(T t);
 }
