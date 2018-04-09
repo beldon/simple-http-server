@@ -1,10 +1,12 @@
 package me.beldon.http.handler.impl;
 
 import me.beldon.http.context.Request;
+import me.beldon.http.context.impl.HttpRequest;
 import me.beldon.http.handler.RequestHandler;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -34,7 +36,6 @@ public class DefaultRequestHandler implements RequestHandler {
             buffer.flip();
             while (buffer.hasRemaining()) {
                 byte b = buffer.get();
-                System.out.println(b);
                 if (hasHeader) {
                     headers.write(b);
                     if (b == CR || b == LF) {
@@ -45,7 +46,7 @@ public class DefaultRequestHandler implements RequestHandler {
                             }
                             flag = true;
                         }
-                    }else{
+                    } else {
                         flag = false;
                     }
                 } else {
@@ -55,11 +56,7 @@ public class DefaultRequestHandler implements RequestHandler {
             }
             buffer.clear();
         }
-
-        System.out.println(new String(headers.toByteArray()));
-        System.out.println("-----------------");
-        System.out.println(new String(body.toByteArray()));
-        System.out.println("-----------------");
-        return null;
+        String remoteAddress = ((InetSocketAddress) socketChannel.getRemoteAddress()).getHostString();
+        return new HttpRequest(new String(headers.toByteArray()), body.toByteArray(),remoteAddress);
     }
 }

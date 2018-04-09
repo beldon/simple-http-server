@@ -1,5 +1,7 @@
 package me.beldon.http.context;
 
+import java.io.InputStream;
+
 /**
  * @author Beldon
  */
@@ -12,9 +14,9 @@ public interface Request {
 
     String getContentType();
 
+    String getMethod();
 
-    String getParameter();
-
+    String getParameter(String name);
 
     String getProtocol();
 
@@ -25,4 +27,6 @@ public interface Request {
     void setAttribute(String name, Object obj);
 
     void removeAttribute(String name);
+
+    InputStream getInputStream();
 }
