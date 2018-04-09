@@ -1,6 +1,5 @@
 package demo;
 
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -13,7 +12,8 @@ import java.nio.channels.FileChannel;
  * @create 2018-04-09 下午5:14
  */
 public class TextParseTest {
-
+    private static final int LF = 10;
+    private static final int CR = 13;
     @Test
     public void test() throws Exception {
         FileInputStream fileInputStream = new FileInputStream("html/demo.txt");
@@ -25,22 +25,28 @@ public class TextParseTest {
         boolean hasHeader = true;
         while (channel.read(buffer) > 0) {
             buffer.flip();
+            byte lastByte = -1;
             while (buffer.hasRemaining()) {
                 byte b = buffer.get();
+                System.out.println(b);
                 if (hasHeader) {
-                    if (b == 10 || b == 13) {// 换行或回车
+                    if (lastByte == CR && b == LF) {
                         if (flag) {
                             hasHeader = false;
+                            System.out.println("--------------hasHeader---------------");
                             continue;
                         }
                         flag = true;
                     } else {
-                        flag = false;
+                        if (!(flag && lastByte == LF)) {
+                            flag = false;
+                        }
                     }
                     headers.write(b);
-                }else{
+                } else {
                     body.write(b);
                 }
+                lastByte = b;
             }
             buffer.clear();
         }
@@ -50,4 +56,7 @@ public class TextParseTest {
         System.out.println(new String(body.toByteArray()));
         System.out.println("-----------------");
     }
+
+
+
 }

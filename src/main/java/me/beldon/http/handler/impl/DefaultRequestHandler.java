@@ -13,31 +13,45 @@ import java.nio.channels.SocketChannel;
  * @create 2018-04-09 下午6:05
  */
 public class DefaultRequestHandler implements RequestHandler {
+    /**
+     * 换行符
+     */
+    private static final int LF = 10;
+    /**
+     * 回车符
+     */
+    private static final int CR = 13;
+
     @Override
     public Request handle(SocketChannel socketChannel) throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(20);
         ByteArrayOutputStream headers = new ByteArrayOutputStream();
         ByteArrayOutputStream body = new ByteArrayOutputStream();
-        boolean flag = false;
         boolean hasHeader = true;
+        boolean flag = false;
+        byte lastByte = -1;
         while (socketChannel.read(buffer) > 0) {
             buffer.flip();
             while (buffer.hasRemaining()) {
                 byte b = buffer.get();
+                System.out.println(b);
                 if (hasHeader) {
-                    if (b == 10 || b == 13) {// 换行或回车
-                        if (flag) {
-                            hasHeader = false;
-                            continue;
+                    headers.write(b);
+                    if (b == CR || b == LF) {
+                        if (lastByte == CR && b == LF) {
+                            if (flag) {
+                                hasHeader = false;
+                                continue;
+                            }
+                            flag = true;
                         }
-                        flag = true;
-                    } else {
+                    }else{
                         flag = false;
                     }
-                    headers.write(b);
-                }else{
+                } else {
                     body.write(b);
                 }
+                lastByte = b;
             }
             buffer.clear();
         }
