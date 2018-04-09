@@ -2,11 +2,11 @@ package me.beldon.http.server;
 
 import lombok.extern.slf4j.Slf4j;
 import me.beldon.http.config.CommonConfig;
+import me.beldon.http.handler.RequestHandler;
+import me.beldon.http.handler.ResponseHandler;
+import me.beldon.http.handler.impl.DefaultRequestHandler;
+import me.beldon.http.handler.impl.DefaultResponseHandler;
 
-import java.net.InetSocketAddress;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,38 +16,31 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class ServerManager {
     private final ExecutorService bossPool = Executors.newFixedThreadPool(1);
-
     private CommonConfig commonConfig;
 
-    private ContextManager contextManager;
 
-    private Selector selector;
+    private final BossContextManager contextManager;
+    private final BossContext bossContext;
 
-    private BossContext bossContext;
+    private final RequestHandler requestHandler;
+    private final ResponseHandler responseHandler;
 
 
     public ServerManager() {
         commonConfig = new CommonConfig();
-        contextManager = new ContextManager();
+        requestHandler = new DefaultRequestHandler();
+        responseHandler = new DefaultResponseHandler();
+        contextManager = new BossContextManager(requestHandler, responseHandler);
+        bossContext = new BossContext(contextManager, commonConfig.getPort());
     }
 
 
     public void destroy() {
-        if (bossContext != null) {
-            bossContext.stop();
-        }
+        bossContext.stop();
     }
 
     public void startServer() throws Exception {
-        int port = commonConfig.getPort();
-        selector = Selector.open();
-        ServerSocketChannel serverChannel = ServerSocketChannel.open();
-        serverChannel.configureBlocking(false);
-        serverChannel.socket().bind(new InetSocketAddress(port), 150);
-        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-        log.info("服务器启动成功，端口:{}", port);
-        bossContext = new BossContext(selector, contextManager);
+        bossContext.start();
         bossPool.submit(bossContext);
     }
-
 }

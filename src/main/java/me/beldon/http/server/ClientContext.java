@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.beldon.http.context.CommonContextHolder;
 import me.beldon.http.context.Request;
 import me.beldon.http.handler.RequestHandler;
+import me.beldon.http.handler.ResponseHandler;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -16,13 +17,16 @@ import java.nio.channels.SocketChannel;
 @Slf4j
 public class ClientContext implements Runnable {
 
-    private SocketChannel socketChannel;
+    private final SocketChannel socketChannel;
+    private final RequestHandler requestHandler;
+    private final ResponseHandler responseHandler;
 
-    private RequestHandler requestHandler;
-
-    public void setSocketChannel(SocketChannel socketChannel) {
+    public ClientContext(SocketChannel socketChannel, RequestHandler requestHandler, ResponseHandler responseHandler) {
         this.socketChannel = socketChannel;
+        this.requestHandler = requestHandler;
+        this.responseHandler = responseHandler;
     }
+
 
     @Override
     public void run() {

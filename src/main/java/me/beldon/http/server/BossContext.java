@@ -17,15 +17,24 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class BossContext implements Runnable {
 
-    private final Selector selector;
+    private  Selector selector;
     private volatile boolean running;
+    private final BossContextManager contextManager;
+    private final int port;
 
-    private final ContextManager contextManager;
-
-    public BossContext(Selector selector, ContextManager contextManager) {
-        this.selector = selector;
+    public BossContext(BossContextManager contextManager, int port) {
         this.contextManager = contextManager;
+        this.port = port;
         running = true;
+    }
+
+    public void start() throws IOException {
+        selector = Selector.open();
+        ServerSocketChannel serverChannel = ServerSocketChannel.open();
+        serverChannel.configureBlocking(false);
+        serverChannel.socket().bind(new InetSocketAddress(port), 150);
+        serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+        log.info("服务器启动成功，端口:{}", port);
     }
 
     @Override
