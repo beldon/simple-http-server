@@ -1,6 +1,7 @@
 package me.beldon.http;
 
-import me.beldon.http.server.ServerManager;
+import me.beldon.http.config.HttpConfigurer;
+import me.beldon.http.server.DefaultHttpServer;
 
 /**
  * @author beldon
@@ -8,6 +9,13 @@ import me.beldon.http.server.ServerManager;
 public class LaunchApplication {
 
     public static void main(String[] args) throws Exception {
-        new ServerManager().startServer();
+        DefaultHttpServer httpServer = new DefaultHttpServer(configurer());
+        httpServer.start();
+    }
+
+    private static HttpConfigurer configurer() {
+        return config -> {
+
+        };
     }
 }

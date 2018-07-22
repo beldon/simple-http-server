@@ -1,6 +1,8 @@
 package me.beldon.http.context;
 
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.Collection;
 
 /**
  * @author Beldon
@@ -8,7 +10,7 @@ import java.io.PrintWriter;
 public interface Response {
     String getContentType();
 
-    void getOutputStream();
+    OutputStream getOutputStream();
 
     PrintWriter getWriter();
 
@@ -16,5 +18,9 @@ public interface Response {
 
     void setContentLength(long len);
 
-    void setContentType(String type);
+    void setContentType(String contentType);
+
+    void setHeader(String name, String value);
+
+    String getHeader(String name);
 }
