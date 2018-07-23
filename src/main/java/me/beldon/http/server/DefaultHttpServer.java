@@ -57,8 +57,7 @@ public class DefaultHttpServer extends AbstractHttpServer {
     protected void handlerConnect(SocketChannel channel) {
         log.info("client connect");
         try {
-            Request request = null;
-//            Request request = requestHandler.handle(channel);
+            Request request = requestHandler.handle(channel);
             Response response = responseHandler.handle(channel);
             serverHandler.handler(request, response);
         } catch (Exception e) {

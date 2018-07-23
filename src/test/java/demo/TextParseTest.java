@@ -1,5 +1,6 @@
 package demo;
 
+import me.beldon.http.util.StringUtils;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -8,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Beldon
@@ -94,7 +97,21 @@ public class TextParseTest {
 
         StringReader reader = new StringReader(request.toString());
         BufferedReader bufferedReader = new BufferedReader(reader);
-        System.out.println(bufferedReader.readLine());
+
+        String msg = bufferedReader.readLine();
+        String[] split = msg.split(" ");
+        String method = split[0];
+        String uri = split[1];
+        String protocol = split[2];
+
+        Map<String, String> headers = new HashMap<>();
+        String header;
+        while (StringUtils.hasText(header = bufferedReader.readLine())) {
+            String[] split1 = header.split(" ");
+            headers.put(split1[0], split1[1]);
+        }
+
+        System.out.println(method);
 
     }
 
@@ -110,5 +127,7 @@ public class TextParseTest {
             System.out.println(data[0]);
         }
     }
+
+
 
 }

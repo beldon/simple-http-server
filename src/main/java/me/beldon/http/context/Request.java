@@ -29,4 +29,6 @@ public interface Request {
     void removeAttribute(String name);
 
     InputStream getInputStream();
+
+    String getUri();
 }

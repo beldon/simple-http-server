@@ -19,6 +19,8 @@ public class DefaultHttpResponse implements Response {
 
     private Map<String, String> headers = new HashMap<>();
 
+    private int httpStatus = 200;
+
 
     public DefaultHttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
@@ -51,6 +53,11 @@ public class DefaultHttpResponse implements Response {
     }
 
     @Override
+    public long getContentLength() {
+        return this.contentLength;
+    }
+
+    @Override
     public void setContentType(String contentType) {
         this.contentType = contentType;
     }
@@ -63,5 +70,15 @@ public class DefaultHttpResponse implements Response {
     @Override
     public String getHeader(String name) {
         return headers.get(name);
+    }
+
+    @Override
+    public void setHttpStatus(int httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    @Override
+    public int getHttpStatus() {
+        return httpStatus;
     }
 }

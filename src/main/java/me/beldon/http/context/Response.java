@@ -2,7 +2,6 @@ package me.beldon.http.context;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.Collection;
 
 /**
  * @author Beldon
@@ -18,9 +17,15 @@ public interface Response {
 
     void setContentLength(long len);
 
+    long getContentLength();
+
     void setContentType(String contentType);
 
     void setHeader(String name, String value);
 
     String getHeader(String name);
+
+    void setHttpStatus(int code);
+
+    int getHttpStatus();
 }

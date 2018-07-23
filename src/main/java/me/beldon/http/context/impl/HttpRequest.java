@@ -1,8 +1,10 @@
 package me.beldon.http.context.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import me.beldon.http.context.Request;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,29 +12,29 @@ import java.util.Map;
 /**
  * @author Beldon
  */
+@Slf4j
 public class HttpRequest implements Request {
 
-    private static final String SPLIT = "\r\n";
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
 
 
-    private Map<String, String> headers = new HashMap<>();
+    private Map<String, String> headers;
     private Map<String, String> parameters = new HashMap<>();
     private Map<String, Object> attribute = new HashMap<>();
     private String method;
     private String uri;
     private String protocol;
-    private final byte[] body;
-    private final String remoteAddress;
+    private String remoteAddress;
+    private InputStream body;
 
-    public HttpRequest(String headerContent, byte[] body, String remoteAddress) {
-        this.body = body;
+
+    public HttpRequest(Map<String, String> headers, String remoteAddress, String uri, String protocol, String method, InputStream inputStream) {
+        this.headers = headers;
         this.remoteAddress = remoteAddress;
-        String[] headers = headerContent.split(SPLIT);
-        initMethod(headers[0]);
-        initURI(headers[0]);
-        initProtocol(headers[0]);
-        initRequestHeaders(headers);
+        this.uri = uri;
+        this.protocol = protocol;
+        this.method = method;
+        this.body = inputStream;
     }
 
     @Override
@@ -47,7 +49,12 @@ public class HttpRequest implements Request {
 
     @Override
     public long getContentLength() {
-        return body.length;
+        try {
+            return body.available();
+        } catch (IOException e) {
+            log.error("get body available error.", e);
+        }
+        return 0;
     }
 
     @Override
@@ -92,40 +99,11 @@ public class HttpRequest implements Request {
 
     @Override
     public InputStream getInputStream() {
-        return new ByteArrayInputStream(body);
+        return body;
     }
 
-    private void initMethod(String str) {
-        method = str.substring(0, str.indexOf(" "));
-    }
-
-    private void initURI(String str) {
-        uri = str.substring(str.indexOf(" ") + 1, str.indexOf(" ", str.indexOf(" ") + 1));
-        if (uri.contains("?")) {
-            String attr = uri.substring(uri.indexOf("?") + 1, uri.length());
-            uri = uri.substring(0, uri.indexOf("?"));
-            initParameter(attr);
-        }
-    }
-
-    private void initParameter(String attr) {
-        String[] attrs = attr.split("&");
-        for (String string : attrs) {
-            String key = string.substring(0, string.indexOf("="));
-            String value = string.substring(string.indexOf("=") + 1);
-            parameters.put(key, value);
-        }
-    }
-
-    private void initProtocol(String str) {
-        protocol = str.substring(str.lastIndexOf(" ") + 1, str.length());
-    }
-
-    private void initRequestHeaders(String[] strs) {
-        for (int i = 1; i < strs.length; i++) {
-            String key = strs[i].substring(0, strs[i].indexOf(":"));
-            String value = strs[i].substring(strs[i].indexOf(":") + 1);
-            headers.put(key, value);
-        }
+    @Override
+    public String getUri() {
+        return uri;
     }
 }
