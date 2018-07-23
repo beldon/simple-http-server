@@ -32,9 +32,7 @@ public class DefaultServerHandler implements ServerHandler {
             writeHeader(response);
             writeContent(response, "not found");
         } else {
-            if (ImageCheck.isImage(targetFile)) {
-                response.setContentType("image/png");
-            }
+            response.setContentType(getContentType(targetFile));
             response.setContentLength(targetFile.length());
             writeHeader(response);
             writeContent(response, targetFile);
@@ -82,5 +80,19 @@ public class DefaultServerHandler implements ServerHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    private String getContentType(File file) {
+        String contentType = DEFAULT_CONTENT_TYPE;
+        String name = file.getName();
+        if (ImageCheck.isImage(file)) {
+            contentType = "image/png";
+        } else if (name.endsWith(".js")) {
+            contentType = "application/javascript";
+        } else if (name.endsWith(".css")) {
+            contentType = "text/css";
+        }
+        return contentType;
     }
 }

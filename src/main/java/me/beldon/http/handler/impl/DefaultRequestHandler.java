@@ -63,6 +63,9 @@ public class DefaultRequestHandler implements RequestHandler {
         BufferedReader bufferedReader = new BufferedReader(reader);
 
         String msg = bufferedReader.readLine();
+        if (!StringUtils.hasText(msg)) {
+            return null;
+        }
         String[] split = msg.split(SPILD);
         String method = split[0];
         String uri = split[1];
@@ -74,7 +77,10 @@ public class DefaultRequestHandler implements RequestHandler {
             String[] headSpild = header.split(SPILD);
             headers.put(headSpild[0], headSpild[1]);
         }
-
+        int i = uri.indexOf("?");
+        if (i > 0) {
+            uri = uri.substring(0, i);
+        }
         String remoteAddress = ((InetSocketAddress) socketChannel.getRemoteAddress()).getHostString();
         return new HttpRequest(headers, remoteAddress, uri, protocol, method, is);
     }
